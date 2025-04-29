@@ -1,25 +1,19 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom";
+import Town from "./scenes/Town";
+import Wilderness from "./scenes/Wilderness";
 
 function App() {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <Router>
+      <nav className="p-4 bg-gray-800 text-white flex gap-4">
+        <Link to="/">Town</Link>
+        <Link to="/wilderness">Wilderness</Link>
+      </nav>
+      <Routes>
+        <Route path="/" element={<Town />} />
+        <Route path="/wilderness" element={<Wilderness />} />
+      </Routes>
+    </Router>
   );
 }
 
