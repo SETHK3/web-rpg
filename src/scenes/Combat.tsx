@@ -7,12 +7,88 @@ interface Monster {
   attack: number;
   rewardGold: number;
   rewardXP: number;
+  drops?: Array<{
+    chance: number;
+    item: {
+      id: string;
+      name: string;
+      type: "weapon" | "armor" | "potion";
+      rarity: "common" | "uncommon" | "rare";
+      stats: { attack?: number; defense?: number; hp?: number };
+      cost: number;
+      description: string;
+      icon: string;
+    };
+  }>;
 }
 
 const monsters: Monster[] = [
-  { name: "Goblin", hp: 6, attack: 2, rewardGold: 5, rewardXP: 3 },
-  { name: "Wolf", hp: 10, attack: 3, rewardGold: 10, rewardXP: 5 },
-  { name: "Troll", hp: 18, attack: 4, rewardGold: 20, rewardXP: 10 },
+  {
+    name: "Goblin",
+    hp: 6,
+    attack: 2,
+    rewardGold: 5,
+    rewardXP: 3,
+    drops: [
+      {
+        chance: 0.3,
+        item: {
+          id: "rusty_dagger",
+          name: "Rusty Dagger",
+          type: "weapon",
+          rarity: "common",
+          stats: { attack: 1 },
+          cost: 3,
+          description: "A worn-out dagger",
+          icon: "🗡️",
+        },
+      },
+    ],
+  },
+  {
+    name: "Wolf",
+    hp: 10,
+    attack: 3,
+    rewardGold: 10,
+    rewardXP: 5,
+    drops: [
+      {
+        chance: 0.2,
+        item: {
+          id: "wolf_pelt",
+          name: "Wolf Pelt",
+          type: "armor",
+          rarity: "common",
+          stats: { defense: 1 },
+          cost: 5,
+          description: "A warm wolf pelt",
+          icon: "🦊",
+        },
+      },
+    ],
+  },
+  {
+    name: "Troll",
+    hp: 18,
+    attack: 4,
+    rewardGold: 20,
+    rewardXP: 10,
+    drops: [
+      {
+        chance: 0.1,
+        item: {
+          id: "troll_club",
+          name: "Troll Club",
+          type: "weapon",
+          rarity: "uncommon",
+          stats: { attack: 3 },
+          cost: 15,
+          description: "A heavy club taken from a troll",
+          icon: "🏑",
+        },
+      },
+    ],
+  },
 ];
 
 export default function Combat() {
@@ -48,6 +124,17 @@ export default function Combat() {
       newLog.push(
         `You defeated the ${monster.name} and earned ${monster.rewardGold} gold!`
       );
+
+      // Handle item drops
+      if (monster.drops) {
+        monster.drops.forEach((drop) => {
+          if (Math.random() < drop.chance) {
+            addItem(drop.item);
+            newLog.push(`You found a ${drop.item.name}!`);
+          }
+        });
+      }
+
       setMonster(null);
     } else {
       newLog.push(`The ${monster.name} hits you for ${monster.attack} damage.`);

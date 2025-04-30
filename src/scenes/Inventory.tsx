@@ -12,8 +12,10 @@ export default function Inventory() {
         <ul className="list-disc list-inside space-y-1">
           {inventory.map((item, index) => (
             <li key={index}>
-              {item.name} ({item.type}
-              {item.power ? `, +${item.power}` : ""})
+              {item.icon} {item.name} ({item.type}
+              {item.stats.attack ? `, +${item.stats.attack} ATK` : ""}
+              {item.stats.defense ? `, +${item.stats.defense} DEF` : ""}
+              {item.stats.hp ? `, +${item.stats.hp} HP` : ""})
             </li>
           ))}
         </ul>
