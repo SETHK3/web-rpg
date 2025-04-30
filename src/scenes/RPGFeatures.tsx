@@ -9,6 +9,11 @@ interface Item {
   cost?: number;
 }
 
+interface EquipmentSlot {
+  type: "head" | "chest" | "legs" | "weapon" | "shield";
+  item: Item | null;
+}
+
 export default function RPGFeatures() {
   const {
     inventory,
@@ -28,8 +33,13 @@ export default function RPGFeatures() {
     { id: "potion1", name: "Health Potion", type: "potion", cost: 5 },
   ];
 
-  const [equippedWeapon, setEquippedWeapon] = useState<Item | null>(null);
-  const [equippedArmor, setEquippedArmor] = useState<Item | null>(null);
+  const [equipmentSlots, setEquipmentSlots] = useState<EquipmentSlot[]>([
+    { type: "head", item: null },
+    { type: "chest", item: null },
+    { type: "legs", item: null },
+    { type: "weapon", item: null },
+    { type: "shield", item: null },
+  ]);
 
   const handleBuy = (item: Item) => {
     if (gold >= (item.cost || 0)) {
@@ -45,67 +55,126 @@ export default function RPGFeatures() {
       setHP(hp + 5);
       removeItem(item.id);
     } else if (item.type === "weapon") {
-      setEquippedWeapon(item);
-      setAttack(5 + (item.power || 0));
+      const newSlots = [...equipmentSlots];
+      const weaponSlot = newSlots.find((slot) => slot.type === "weapon");
+      if (weaponSlot) {
+        weaponSlot.item = item;
+        setEquipmentSlots(newSlots);
+        setAttack(5 + (item.power || 0));
+      }
     } else if (item.type === "armor") {
-      setEquippedArmor(item);
+      const newSlots = [...equipmentSlots];
+      const armorSlot = newSlots.find((slot) => slot.type === "chest");
+      if (armorSlot) {
+        armorSlot.item = item;
+        setEquipmentSlots(newSlots);
+      }
     }
   };
 
   return (
-    <div className="p-4 space-y-6">
-      <div>
-        <h2 className="text-xl font-bold">🛒 Shop</h2>
-        <div className="space-y-2">
-          {shopItems.map((item) => (
-            <div key={item.id} className="flex justify-between">
-              <span>
-                {item.name} - {item.cost} gold
-              </span>
-              <button
-                onClick={() => handleBuy(item)}
-                className="bg-green-500 px-2 py-1 rounded text-white"
-              >
-                Buy
-              </button>
+    <div className="p-4 bg-gray-900 text-white min-h-screen">
+      <div className="max-w-4xl mx-auto grid grid-cols-2 gap-8">
+        {/* Left side - Equipment and Stats */}
+        <div className="space-y-6">
+          <div className="bg-gray-800 p-4 rounded">
+            <h2 className="text-xl font-bold mb-4">⚔️ Equipment</h2>
+            <div className="grid grid-cols-3 gap-2">
+              {/* Equipment slots grid */}
+              <div className="col-start-2">
+                <div className="w-16 h-16 border-2 border-gray-600 rounded flex items-center justify-center">
+                  {equipmentSlots.find((slot) => slot.type === "head")?.item
+                    ?.name || "Head"}
+                </div>
+              </div>
+              <div className="col-start-1">
+                <div className="w-16 h-16 border-2 border-gray-600 rounded flex items-center justify-center">
+                  {equipmentSlots.find((slot) => slot.type === "weapon")?.item
+                    ?.name || "Weapon"}
+                </div>
+              </div>
+              <div className="col-start-2">
+                <div className="w-16 h-16 border-2 border-gray-600 rounded flex items-center justify-center">
+                  {equipmentSlots.find((slot) => slot.type === "chest")?.item
+                    ?.name || "Chest"}
+                </div>
+              </div>
+              <div className="col-start-3">
+                <div className="w-16 h-16 border-2 border-gray-600 rounded flex items-center justify-center">
+                  {equipmentSlots.find((slot) => slot.type === "shield")?.item
+                    ?.name || "Shield"}
+                </div>
+              </div>
+              <div className="col-start-2">
+                <div className="w-16 h-16 border-2 border-gray-600 rounded flex items-center justify-center">
+                  {equipmentSlots.find((slot) => slot.type === "legs")?.item
+                    ?.name || "Legs"}
+                </div>
+              </div>
             </div>
-          ))}
+          </div>
+
+          <div className="bg-gray-800 p-4 rounded">
+            <h2 className="text-xl font-bold mb-4">📊 Stats</h2>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <p>HP: {hp}</p>
+                <p>Attack: {attack}</p>
+                <p>Gold: {gold}</p>
+              </div>
+            </div>
+          </div>
         </div>
-      </div>
 
-      <div>
-        <h2 className="text-xl font-bold">🎒 Inventory</h2>
-        {inventory.length === 0 ? (
-          <p>Your inventory is empty.</p>
-        ) : (
-          <ul className="list-disc list-inside space-y-1">
-            {inventory.map((item, index) => (
-              <li key={index}>
-                {item.name} ({item.type}
-                {item.power ? `, +${item.power}` : ""})
-                <button
-                  onClick={() => handleUseItem(item)}
-                  className="ml-2 bg-blue-500 px-2 py-1 text-white rounded"
+        {/* Right side - Inventory and Shop */}
+        <div className="space-y-6">
+          <div className="bg-gray-800 p-4 rounded">
+            <h2 className="text-xl font-bold mb-4">🎒 Inventory</h2>
+            <div className="grid grid-cols-5 gap-2">
+              {Array.from({ length: 20 }).map((_, index) => {
+                const item = inventory[index];
+                return (
+                  <div
+                    key={index}
+                    className="w-12 h-12 border-2 border-gray-600 rounded flex items-center justify-center text-xs p-1"
+                    title={item?.name}
+                  >
+                    {item && (
+                      <button
+                        onClick={() => handleUseItem(item)}
+                        className="w-full h-full flex items-center justify-center"
+                      >
+                        {item.name.slice(0, 3)}
+                      </button>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          <div className="bg-gray-800 p-4 rounded">
+            <h2 className="text-xl font-bold mb-4">🛒 Shop</h2>
+            <div className="space-y-2">
+              {shopItems.map((item) => (
+                <div
+                  key={item.id}
+                  className="flex justify-between items-center"
                 >
-                  Use
-                </button>
-              </li>
-            ))}
-          </ul>
-        )}
-      </div>
-
-      <div>
-        <h2 className="text-xl font-bold">🧙 Equipped</h2>
-        <p>Weapon: {equippedWeapon ? equippedWeapon.name : "None"}</p>
-        <p>Armor: {equippedArmor ? equippedArmor.name : "None"}</p>
-      </div>
-
-      <div>
-        <h2 className="text-xl font-bold">📊 Stats</h2>
-        <p>Gold: {gold}</p>
-        <p>HP: {hp}</p>
-        <p>Attack: {attack}</p>
+                  <span>
+                    {item.name} - {item.cost} gold
+                  </span>
+                  <button
+                    onClick={() => handleBuy(item)}
+                    className="bg-green-600 px-2 py-1 rounded hover:bg-green-500"
+                  >
+                    Buy
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );
